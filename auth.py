@@ -159,11 +159,12 @@ def reset_password(token):
     )
 
     reset = cursor.fetchone()
+    if not reset:
+        return "Lien invalide ❌"
     if reset["expires_at"] < datetime.now():
         return "Lien expiré ❌"
 
-    if not reset:
-        return "Lien invalide ❌"
+    
 
     if request.method == "POST":
 
