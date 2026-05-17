@@ -30,7 +30,7 @@ def register():
         email = request.form["email"]
         password= request.form["password"]
         # hash password
-        hashed_password=bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
         
         role ="utilisateur"
         #check email
@@ -41,6 +41,9 @@ def register():
         #insert user 
         code = str(random.randint(100000,999999))
         cursor.execute("INSERT INTO users(nom,email,password,role,verification_code)VALUES(%s, %s, %s,%s,%s)",(nom, email, hashed_password,role,code))
+        user_id = cursor.lastrowid
+
+        cursor.execute("INSERT INTO logs (user_id, action, date) VALUES (%s,%s,NOW())",(user_id, "inscription"))
 
         db.commit()
 
@@ -156,6 +159,8 @@ def reset_password(token):
     )
 
     reset = cursor.fetchone()
+    if reset["expires_at"] < datetime.now():
+        return "Lien expiré ❌"
 
     if not reset:
         return "Lien invalide ❌"
@@ -180,6 +185,8 @@ def reset_password(token):
         )
 
         db.commit()
+        cursor.close()
+        db.close()
 
         return redirect(
             "/login?success=Mot de passe modifié avec succès ✅"

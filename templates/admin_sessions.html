@@ -46,6 +46,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
             border:none;
             border-radius:20px;
         }
+        table tbody tr:hover{
+    background:#f3f4f6;
+    transition:0.3s;
+}
 
     
 </style>
@@ -86,10 +90,41 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
 
 <div class="content">
+     <div class="d-flex justify-content-between align-items-center mb-2">
 
-    <h2 class="mb-4">Sessions</h2>
+   
 
-    <table class="table table-bordered table-hover bg-white">
+   <input type="text"  id="searchInput" class="form-control mb-3" placeholder="🔍 Rechercher...">
+
+</div>
+<div class="d-flex justify-content-between align-items-center mb-2">
+
+    <h4>
+        les sessions
+    </h4>
+
+    <div class="text-end small text-muted">
+
+        <div>
+            Total sessions :
+            <strong>{{ total_sessions }}</strong>
+        </div>
+
+        <div>
+            Sessions actives :
+            <strong>{{ active_sessions }}</strong>
+        </div>
+
+        <div>
+            Session fermées :
+            <strong>{{ closed_sessions }}</strong>
+        </div>
+
+    </div>
+
+</div>
+
+    <table class="table table-bordered table-hover bg-white" id="sessionsTable">
 
         <thead class="table-dark">
 
@@ -148,8 +183,65 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         </tbody>
 
     </table>
+    <div class="d-flex justify-content-center mt-4 gap-2">
+
+    {% if page > 1 %}
+
+    <a href="/admin/sessions?page={{ page - 1 }}"
+       class="btn btn-outline-primary">
+
+        Previous
+
+    </a>
+
+    {% endif %}
+
+    {% if page < total_pages %}
+
+    <a href="/admin/sessions?page={{ page + 1 }}"
+       class="btn btn-outline-primary">
+
+        Next
+
+    </a>
+
+    {% endif %}
 
 </div>
 
+</div>
+<script>
+const searchInput =
+document.getElementById("searchInput");
+
+searchInput.addEventListener("keyup", function(){
+
+    let value =
+    searchInput.value.toLowerCase();
+
+    let rows =
+    document.querySelectorAll("#sessionsTable tbody tr");
+
+    rows.forEach(function(row){
+
+        let text =
+        row.textContent.toLowerCase();
+
+        if(text.includes(value)){
+
+            row.style.display = "";
+
+        }
+
+        else{
+
+            row.style.display = "none";
+
+        }
+
+    });
+
+});
+</script>
 </body>
 </html>

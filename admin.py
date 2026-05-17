@@ -213,7 +213,11 @@ def sessions():
 
     db = get_db()
     cursor = db.cursor(dictionary=True)
+    page = request.args.get('page', 1, type=int)
 
+    per_page = 5
+
+    offset = (page - 1) * per_page
     cursor.execute("""
         SELECT users.nom,
                users.email,
@@ -226,14 +230,41 @@ def sessions():
         JOIN users
         ON users.id = user_session.user_id and role!='admin'
 
-        ORDER BY user_session.created_at DESC
-    """)
+        ORDER BY user_session.created_at DESC LIMIT %s OFFSET %s""",(per_page, offset))
 
     sessions_data = cursor.fetchall()
+    # total sessions
+
+    cursor.execute(
+     "SELECT COUNT(*) as total FROM user_session JOIN users ON users.id = user_session.user_id WHERE users.role != 'admin' ")
+
+    total_sessions = cursor.fetchone()["total"]
+    total_pages = (total_sessions + per_page - 1) // per_page
+
+    # active sessions
+
+    cursor.execute(
+    "SELECT COUNT(*) as active FROM user_session JOIN users ON users.id = user_session.user_id WHERE is_revoked=0 AND users.role != 'admin'")
+
+    active_sessions = cursor.fetchone()["active"]
+
+    # closed sessions
+
+    cursor.execute(
+    "SELECT COUNT(*) as closed FROM user_session JOIN users ON users.id = user_session.user_id WHERE is_revoked=1 AND users.role != 'admin'")
+
+    closed_sessions = cursor.fetchone()["closed"]
+    cursor.close()
+    db.close()
 
     return render_template(
         "admin_sessions.html",
-        sessions=sessions_data
+        sessions=sessions_data,
+        total_sessions=total_sessions,
+        active_sessions=active_sessions,
+        closed_sessions=closed_sessions,
+        page=page,
+        total_pages=total_pages
     )
 @admin.route("/admin/logs")
 def logs_page():
@@ -241,10 +272,43 @@ def logs_page():
         return redirect("/login")
     db= get_db()
     cursor=db.cursor(dictionary=True)
+    page = request.args.get('page', 1, type=int)
+
+    per_page = 5
+
+    offset = (page - 1) * per_page
     cursor.execute("""select users.nom,logs.action,logs.date
-                   FROM logs JOIN users on users.id = logs.user_id and users.role!="admin" ORDER BY logs.date DESC  """)
+                   FROM logs JOIN users on users.id = logs.user_id and users.role!="admin" ORDER BY logs.date DESC LIMIT %s OFFSET %s """,(per_page, offset))
     logs =cursor.fetchall()
-    return render_template("admin_logs.html",logs=logs )
+    #total logs
+    cursor.execute("""SELECT COUNT(*) as total FROM logs JOIN users ON users.id = logs.user_id WHERE users.role != 'admin' """)
+
+    total_logs = cursor.fetchone()["total"]
+    total_pages = (total_logs + per_page - 1) // per_page
+    #Nombre de logins
+    cursor.execute("""SELECT COUNT(*) as total FROM logs JOIN users ON users.id = logs.user_id WHERE logs.action='login'AND users.role != 'admin' """)
+
+    logins = cursor.fetchone()["total"]
+    #logouts
+    cursor.execute("""SELECT COUNT(*) as total FROM logs JOIN users ON users.id = logs.user_id WHERE logs.action='logout' AND users.role != 'admin' """)
+
+    logouts = cursor.fetchone()["total"]
+    #inscriptions
+    cursor.execute("""SELECT COUNT(*) as total FROM logs JOIN users ON users.id = logs.user_id WHERE logs.action='inscription' AND users.role != 'admin' """)
+
+    inscriptions = cursor.fetchone()["total"]
+    
+    cursor.close()
+    db.close()
+    return render_template("admin_logs.html",
+                           logs=logs,
+                            total_logs=total_logs,
+                            logins=logins,
+                            logouts=logouts,
+                            inscriptions=inscriptions,
+                            page=page,
+                            total_pages=total_pages)
+    
 
 @admin.route ("/admin/logout")
 def logout():

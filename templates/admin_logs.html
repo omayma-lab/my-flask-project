@@ -77,11 +77,44 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
 <div class="content">
 
-    <h2 class="mb-4">
-        Logs
-    </h2>
+    <div class="d-flex justify-content-between align-items-center mb-2">
 
-    <table class="table table-bordered table-hover bg-white">
+   
+
+   <input type="text"  id="searchInput" class="form-control mb-3" placeholder="🔍 Rechercher...">
+
+</div>
+<div class="d-flex justify-content-between align-items-center mb-2">
+
+    <h4>
+        Les logs
+    </h4>
+
+    <div class="text-end small text-muted">
+
+        <div>
+            Total logs :
+            <strong>{{ total_logs }}</strong>
+        </div>
+
+        <div>
+            Nombre de logins :
+            <strong>{{ logins }}</strong>
+        </div>
+
+        <div>
+            Nombre de logouts :
+            <strong>{{ logouts }}</strong>
+        </div>
+        <div>
+            Nombre d'inscriptions :
+            <strong>{{ inscriptions }}</strong>
+        </div>
+    </div>
+
+</div>
+
+    <table class="table table-bordered table-hover bg-white" id="logsTable">
 
         <thead class="table-dark">
 
@@ -142,8 +175,67 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         </tbody>
 
     </table>
+    <div class="d-flex justify-content-center mt-4 gap-2">
+
+    {% if page > 1 %}
+
+    <a href="/admin/logs?page={{ page - 1 }}"
+       class="btn btn-outline-primary">
+
+        Previous
+
+    </a>
+
+    {% endif %}
+
+    {% if page < total_pages %}
+
+    <a href="/admin/logs?page={{ page + 1 }}"
+       class="btn btn-outline-primary">
+
+        Next
+
+    </a>
+
+    {% endif %}
 
 </div>
+
+</div>
+<script>
+    const searchInput =
+document.getElementById("searchInput");
+
+searchInput.addEventListener("keyup", function(){
+
+    let value =
+    searchInput.value.toLowerCase();
+
+    let rows =
+    document.querySelectorAll("logsTable tbody tr");
+
+    rows.forEach(function(row){
+
+        let text =
+        row.textContent.toLowerCase();
+
+        if(text.includes(value)){
+
+            row.style.display = "";
+
+        }
+
+        else{
+
+            row.style.display = "none";
+
+        }
+
+    });
+
+});
+
+</script>
 
 
         </body>
