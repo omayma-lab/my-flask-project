@@ -141,7 +141,7 @@ def forgt_password():
         cursor.close()
         db.close()
         #reset link 
-        reset_link= f"http://192.168.1.15:5000/reset_password/{token}"
+        reset_link= f"http://gunicorn-app-production-13f0.up.railway.app/reset_password/{token}"
         #send email
         send_email( email,f"Lien de réinitialisation:{reset_link}")
         return render_template("forgot-password.html",success="Lien envoyé par email ✅",email=email)
