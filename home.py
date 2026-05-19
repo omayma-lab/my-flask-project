@@ -10,3 +10,6 @@ def home_page():
     cursor.execute("SELECT * FROM users WHERE id=%s",(session["user_id"],))
     user = cursor.fetchone()
     return render_template("home.html",user=user)
+@home.route("/")
+def index():
+    return "App is working "
