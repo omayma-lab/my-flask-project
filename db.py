@@ -1,11 +1,11 @@
+import os
 import mysql.connector
 def get_db():
     return mysql.connector.connect(
-        host="mysql-1d69b561-my-flask-projectt.c.aivencloud.com",
-        port='11637',
-        user ="avnadmin",
-        password="AVNS_d-Czq0Rmam2PLwH78xU",
-        database="defaultdb",
-        ssl_mode='REQUIRED'
+        host=os.getenv("DB_HOST"),
+        port=int(os.getenv('DB_PORT')),
+        user =os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
+        ssl_mode=False
     )
-print("DB connected successsfully")
