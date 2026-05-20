@@ -1,7 +1,13 @@
 from flask import Flask
-
+from auth import auth
+from admin import admin
+from home import home
+import os
+port = int(os.environ.get("PORT", 8000))
 app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "FLASK WORKING 🚀"
+app.secret_key = "secret123"
+app.register_blueprint(auth)
+app.register_blueprint(admin)
+app.register_blueprint(home)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=port)
