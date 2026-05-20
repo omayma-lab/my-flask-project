@@ -10,16 +10,25 @@ import uuid
 from datetime import datetime, timedelta
 auth = Blueprint ("auth", __name__)
 
-def send_email(to_email,code):
-    msg=MIMEText(f"your verification code is :{code}")
-    msg["subject"]= "verification code"
-    msg["From"]= "ojaa09411@gmail.com"
-    msg["To"]= to_email
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.login("ojaa09411@gmail.com","efrk zwel arvz ievb")
-    server.send_message(msg)
-    server.quit()
+def send_email(to_email, code):
+    try:
+        msg = MIMEText(f"your verification code is: {code}")
+        msg["Subject"] = "verification code"
+        msg["From"] = "your_email@gmail.com"
+        msg["To"] = to_email
+
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+
+        server.login("your_email@gmail.com", "efrk zwel arvz ievb")
+
+        server.send_message(msg)
+        server.quit()
+
+        print("EMAIL SENT SUCCESS ")
+
+    except Exception as e:
+        print("EMAIL ERROR ", e)
 @auth.route("/register", methods=["Get","POST"])
 def register():
     
