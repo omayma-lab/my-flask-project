@@ -58,7 +58,10 @@ def register():
 
         cursor.close()
         db.close()
-        send_email( email , code)
+        try:
+          send_email(email, code)
+        except:
+          print("utilisateur créer")
         session["verify_email"]= email
         return redirect("/verification")
     
