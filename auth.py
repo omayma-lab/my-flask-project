@@ -10,25 +10,16 @@ import uuid
 from datetime import datetime, timedelta
 auth = Blueprint ("auth", __name__)
 
-def send_email(to_email, code):
-    try:
-        msg = MIMEText(f"your verification code is: {code}")
-        msg["Subject"] = "verification code"
-        msg["From"] = "your_email@gmail.com"
-        msg["To"] = to_email
-
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-
-        server.login("your_email@gmail.com", "efrk zwel arvz ievb")
-
-        server.send_message(msg)
-        server.quit()
-
-        print("EMAIL SENT SUCCESS ")
-
-    except Exception as e:
-        print("EMAIL ERROR ", e)
+def send_email(to_email,code):
+    msg=MIMEText(f"votre code de verification :{code}")
+    msg["subject"]= "verification code"
+    msg["From"]= "ojaa09411@gmail.com"
+    msg["To"]= to_email
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+    server.login("ojaa09411@gmail.com","efrk zwel arvz ievb")
+    server.send_message(msg)
+    server.quit()
 @auth.route("/register", methods=["Get","POST"])
 def register():
     
@@ -39,7 +30,7 @@ def register():
         email = request.form["email"]
         password= request.form["password"]
         # hash password
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
+        hashed_password=bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
         
         role ="utilisateur"
         #check email
@@ -50,18 +41,12 @@ def register():
         #insert user 
         code = str(random.randint(100000,999999))
         cursor.execute("INSERT INTO users(nom,email,password,role,verification_code)VALUES(%s, %s, %s,%s,%s)",(nom, email, hashed_password,role,code))
-        user_id = cursor.lastrowid
-
-        cursor.execute("INSERT INTO logs (user_id, action, date) VALUES (%s,%s,NOW())",(user_id, "inscription"))
 
         db.commit()
 
         cursor.close()
         db.close()
-        try:
-          send_email(email, code)
-        except:
-          print("utilisateur créer")
+        send_email( email , code)
         session["verify_email"]= email
         return redirect("/verification")
     
@@ -153,7 +138,7 @@ def forgt_password():
         cursor.close()
         db.close()
         #reset link 
-        reset_link= f"https://web-production-845b9.up.railway.app/reset_password/{token}"
+        reset_link= f"https://192.168.1.5:5000/reset_password/{token}"
         #send email
         send_email( email,f"Lien de réinitialisation:{reset_link}")
         return render_template("forgot-password.html",success="Lien envoyé par email ✅",email=email)
@@ -171,12 +156,9 @@ def reset_password(token):
     )
 
     reset = cursor.fetchone()
+
     if not reset:
         return "Lien invalide ❌"
-    if reset["expires_at"] < datetime.now():
-        return "Lien expiré ❌"
-
-    
 
     if request.method == "POST":
 
@@ -198,8 +180,6 @@ def reset_password(token):
         )
 
         db.commit()
-        cursor.close()
-        db.close()
 
         return redirect(
             "/login?success=Mot de passe modifié avec succès ✅"
